@@ -5,148 +5,127 @@
 
 package com.mobileiron.cordova.appconnect;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Method;
 
-import android.app.IntentService;
+import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaInterface;
+import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.PluginResult;
+import org.json.JSONArray;
+
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.os.Bundle;
+import android.content.IntentFilter;
 import android.util.Log;
 
+
+
 /**
- * An {@link IntentService} subclass for handling asynchronous task requests in
- * a service on a separate handler thread.
- * <p/>
- * TODO: Customize class - update intent actions, extra parameters and static
- * helper methods.
- */
-public class AppConnectConfigService extends IntentService {
-
-    public static final String TAG = "AppConnectConfigService";
-
-    public static final String ACTION_HANDLE_CONFIG = "com.mobileiron.HANDLE_CONFIG";
-    public static final String ACTION_REQUEST_CONFIG = "com.mobileiron.REQUEST_CONFIG";
-    public static final String PACKAGE_NAME = "packageName";
-    public static final String CONFIG_APPLIED_INTENT = "configAppliedIntent";
-    public static final String CONFIG_ERROR_INTENT = "configErrorIntent";
-    public static final String ERROR_STRING = "errorString";
-    public static final String CONFIG = "config";
-
-    // Change to "com.mobileiron.appconnecttester" when testing with AppConnectTester
-    private static final String TARGET_PKG = "com.forgepond.locksmith";
-    //private static final String TARGET_PKG = "forgepond.com.daimler.moconnect.internal.android";
-
-
-    public AppConnectConfigService() {
-        super("AppConnectConfigService");
-    }
-
-    public static boolean isServiceExisted(Context ctx, Intent intent) {
-        // Retrieve all services that can match the given intent
-        PackageManager pm = ctx.getPackageManager();
-        List<ResolveInfo> resolveInfo = pm.queryIntentServices(intent, 0);
-
-        // Make sure only one match was found
-        return (resolveInfo != null && resolveInfo.size() == 1);
-    }
-
-    public static void requestConfig(Context ctx) {
-        Intent intent = new Intent(ACTION_REQUEST_CONFIG);
-        intent.putExtra(PACKAGE_NAME, ctx.getPackageName());
-
-        Log.d(TAG, "Requesting: " + intent);
-        intent.setPackage(TARGET_PKG);
-        if (isServiceExisted(ctx, intent)) {
-            ctx.startService(intent);
-        } else {
-            Log.e(TAG, "package: " + TARGET_PKG + " does not exist");
-        }
-    }
-
-    private static String toString(Bundle b) {
-        if (b == null) {
-            return "";
-        }
-
-        Map<String, String> map = new HashMap<String, String>();
-
-        for (String key : b.keySet()) {
-            Object o = b.get(key);
-            if (o instanceof Intent) {
-                map.put(key, "Intent <" + toString(((Intent)o).getExtras()) + ">");
-            } else if (o instanceof Bundle) {
-                map.put(key, "Bundle <" + toString((Bundle)o) + ">");
-            } else {
-                map.put(key, b.getString(key));
+* The necessary imports at the top of the file extends the class from {@code CordovaPlugin} ,
+* whose {@code execute()} method it overrides to receive messages from {@code exec()}.
+* The {@code execute()} method first tests the value of <strong>action</strong>,
+* for which in this case there are two values <strong>requestConfig</strong> and <strong>setConfigHandler</strong>.
+*
+*/
+public class ACConfigPlugin extends CordovaPlugin {
+    public static final String CONFIG_RECEIVED_BROADCAST_KEY = "CORE_CONFIG_RECEIVED";
+    private static final String TAG = "ACConfigPlugin";
+    private CallbackContext callback = null;
+    private BroadcastReceiver mConfigReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (callback != null) {
+                // Send result to JavaScript
+                // Note: Set {@code keepCallback} to true to ensure availability of callback
+                PluginResult result = new PluginResult(PluginResult.Status.OK, intent.getStringExtra("data"));
+                result.setKeepCallback(true);
+                callback.sendPluginResult(result);
             }
         }
+    };
 
-        return map.toString();
+    // start-up logic
+    @Override
+    public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+        super.initialize(cordova, webView);
+        retisterBroadcastReceivers();
     }
-
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    public void onDestroy() {
+        unregisterBroadcastReceivers();
+        super.onDestroy();
+    }
+
+    /**
+     * Generic plugin command executor
+     *
+     * @param action
+     * @param data
+     * @param callbackContext
+     * @return
+     */
+    @Override
+    public boolean execute(final String action, final JSONArray data, final CallbackContext callbackContext) {
+        Class[] params = new Class[2];
+        params[0] = JSONArray.class;
+        params[1] = CallbackContext.class;
+
         try {
-            if (!Boolean.parseBoolean(System.getProperty("com.mobileiron.wrapped", "false"))
-                    && !getPackageName().equals(getPackageManager().getPermissionInfo(
-                    "com.mobileiron.CONFIG_PERMISSION", 0).packageName)) {
-                Log.d(TAG, "Refusing intent as we don't own our permission?!, myPackageName=" + getPackageName() + ", configPermission=" + getPackageManager().getPermissionInfo(
-                        "com.mobileiron.CONFIG_PERMISSION", 0).packageName);
-
-                return;
-            }
-
-        } catch (PackageManager.NameNotFoundException ex) {
-            Log.d(TAG, "Refusing intent as we can't find our permission?!" + ex.getLocalizedMessage());
-            return;
+            Method method = this.getClass().getDeclaredMethod(action, params);
+            method.invoke(this, data, callbackContext);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
-        if (ACTION_HANDLE_CONFIG.equals(intent.getAction())) {
-            Log.d(TAG, "Config received from MI");
-            Log.d(TAG, "Received intent : " + intent + " " + toString(intent.getExtras()) + " from package " + intent.getStringExtra(PACKAGE_NAME));
+        return true;
+    }
 
-            // Extract config
-            Bundle config = intent.getBundleExtra(CONFIG);
-            String configStr = toString(config);
-            if (config == null) {
-                Log.d(TAG, "Received config: No config!");
-            } else {
-                Log.d(TAG, "Received config: " + configStr);
-            }
+    /**
+     * Plugin JAVA interface
+     *
+     * @description Request config
+     * @param data
+     * @param context
+     * @return
+     */
+    public boolean requestConfig(final JSONArray data, final CallbackContext context) {
+        Log.d(TAG, "requestConfig *** edited");
+        AppConnectConfigService.requestConfig(cordova.getActivity());
+        return true;
+    }
+/*
+    public boolean requestConfig() {
+        Log.d(TAG, "requestConfig **** edited");
+        AppConnectConfigService.requestConfig(cordova.getActivity());
+        return true;
+    }
+*/
+    /**
+     * Plugin JAVA interface
+     *
+     * @description Register handler for new/updated configs
+     * @param data
+     * @param context
+     * @return
+     */
+    public boolean setConfigHandler(final JSONArray data, final CallbackContext context) {
+        Log.d(TAG, "setConfigHandler");
+        callback = context;
+        return true;
+    }
 
-            try {
-                if (isValidConfig()) {
-                    Intent i = (Intent)intent.getParcelableExtra(CONFIG_APPLIED_INTENT);
-                    i.setPackage(TARGET_PKG);
-                    startService(i); // Applied successfully
-                    Log.d(TAG, "Return intent: " + i);
-                } else {
-                    Intent i = (Intent)intent.getParcelableExtra(CONFIG_ERROR_INTENT);
-                    i.putExtra(ERROR_STRING, "This is a sample error message.");
-                    i.setPackage(TARGET_PKG);
-                    startService(i); // There was a problem. Report error
-                    Log.d(TAG, "Return intent: " + i);
-                }
-
-                // Notify UI that configurations has received.
-                Intent configIntent = new Intent(ACConfigPlugin.CONFIG_RECEIVED_BROADCAST_KEY);
-                configIntent.putExtra("data", configStr);
-                this.sendBroadcast(configIntent);
-            } catch (Exception e) {
-                Log.e(TAG, "Exception " + e.getLocalizedMessage() + e.getStackTrace());
-            }
+    private void retisterBroadcastReceivers() {
+        if (mConfigReceiver != null) {
+            cordova.getActivity().registerReceiver(mConfigReceiver, new IntentFilter(CONFIG_RECEIVED_BROADCAST_KEY));
         }
     }
 
-    private boolean isValidConfig() {
-
-
-        return true;
-
+    private void unregisterBroadcastReceivers() {
+        if (mConfigReceiver != null) {
+            cordova.getActivity().unregisterReceiver(mConfigReceiver);
+        }
     }
 }

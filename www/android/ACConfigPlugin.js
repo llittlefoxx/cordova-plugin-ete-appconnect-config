@@ -1,4 +1,4 @@
-cordova.define("cordova-plugin-appconnect-config.ACConfigPlugin", function(require, exports, module) {
+
     /*
      *
      * Distributed by MobileIron, Inc.
@@ -17,7 +17,7 @@ cordova.define("cordova-plugin-appconnect-config.ACConfigPlugin", function(requi
      * @description Set config handler
      * @param {Function} successCallback The function to call when the config data is available
      */
-    ACConfigPlugin.prototype.setConfigHandler = function(successCallback,failureCallback) {
+    ACConfigPlugin.prototype.setConfigHandler = function (successCallback, failureCallback) {
         'use strict';
 
         console.log("TEST -> 1");
@@ -28,7 +28,7 @@ cordova.define("cordova-plugin-appconnect-config.ACConfigPlugin", function(requi
          * @param {service} "ACConfigPlugin"
          * @param {action} "setConfigHandler"
          */
-        cordova.exec (
+        cordova.exec(
             successCallback,
             failureCallback,
             "ACConfigPlugin",
@@ -43,7 +43,7 @@ cordova.define("cordova-plugin-appconnect-config.ACConfigPlugin", function(requi
      * @description Request config from Core
      *
      */
-    ACConfigPlugin.prototype.requestConfig = function(successCallback,failureCallback) {
+    ACConfigPlugin.prototype.requestConfig = function (successCallback, failureCallback) {
         'use strict';
 
         console.log("TEST -> 2");
@@ -54,7 +54,7 @@ cordova.define("cordova-plugin-appconnect-config.ACConfigPlugin", function(requi
          * @param {service} "ACConfigPlugin"
          * @param {action} "requestConfig"
          */
-        cordova.exec (
+        cordova.exec(
             successCallback,
             failureCallback,
             "ACConfigPlugin",
@@ -73,5 +73,3 @@ cordova.define("cordova-plugin-appconnect-config.ACConfigPlugin", function(requi
     if (!window.plugins.appconnect) {
         window.plugins.appconnect = instance;
     }
-
-});

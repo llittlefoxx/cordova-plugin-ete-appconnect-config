@@ -1,16 +1,10 @@
-<!--
-
- Distributed by MobileIron, Inc.
- Customers and partners may freely copy and re-use.
-
- -->
 
 <?xml version="1.0" encoding="UTF-8"?>
 
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="cordova-plugin-ete-appconnect-config"
-        version="8.1.1">
+        version="8.1.2">
 
     <name>cordova-plugin-appconnect-config</name>
     <author>MobileIron</author>
