@@ -1,0 +1,59 @@
+<!--
+
+ Distributed by MobileIron, Inc.
+ Customers and partners may freely copy and re-use.
+
+ -->
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="cordova-plugin-ete-appconnect-config"
+        version="8.1.1">
+
+    <name>cordova-plugin-appconnect-config</name>
+    <author>MobileIron</author>
+    <description>
+        This plugin allows your application to receive app-specific configuration from Core
+    </description>
+
+    <engines>
+        <engine name="cordova" version=">=4.1.0" />
+    </engines>
+
+    <!-- android -->
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="ACConfigPlugin">
+                <param name="android-package" value="com.mobileiron.cordova.appconnect.ACConfigPlugin"/>
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <!-- <uses-sdk android:minSdkVersion="19" /> -->
+            <permission android:name="com.mobileiron.CONFIG_PERMISSION" android:protectionLevel="signature" />
+            <uses-permission android:name="com.mobileiron.CONFIG_PERMISSION" />
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <service android:name="com.mobileiron.cordova.appconnect.AppConnectConfigService"
+                android:enabled="true"
+                android:permission="com.mobileiron.CONFIG_PERMISSION">
+            <intent-filter>
+                <action android:name="com.mobileiron.HANDLE_CONFIG" />
+            </intent-filter>
+        </service>
+        </config-file>
+
+        <js-module src="www/android/ACConfigPlugin.js" name="ACConfigPlugin">
+            <clobbers target="ACConfigPlugin" />
+        </js-module>
+
+        <source-file src="src/android/AppConnectConfigService.java" target-dir="src/com/mobileiron/cordova/appconnect" />
+        <source-file src="src/android/ACConfigPlugin.java" target-dir="src/com/mobileiron/cordova/appconnect" />
+
+    </platform>
+
+</plugin>

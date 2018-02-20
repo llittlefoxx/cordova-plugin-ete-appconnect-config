@@ -1,0 +1,31 @@
+{
+  "name": "cordova-plugin-ete-appconnect-config",
+  "version": "8.1.1",
+  "description": "\n        This plugin allows your application to receive app-specific configuration from Core\n    ",
+  "cordova": {
+    "id": "cordova-plugin-ete-appconnect-config",
+    "platforms": [
+      "android"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/llittlefoxx/cordova-plugin-ete-appconnect-config.git"
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-android"
+  ],
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=4.1.0"
+    }
+  ],
+  "author": "MobileIron and Mohamed ali Tlili",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/llittlefoxx/cordova-plugin-ete-appconnect-config/issues"
+  },
+  "homepage": "https://github.com/llittlefoxx/cordova-plugin-ete-appconnect-config#readme"
+}
