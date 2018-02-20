@@ -27,14 +27,22 @@ The method passed to `setConfigHandler` will be triggered when new or updated co
 window.plugins.appconnect.setConfigHandler (
     function (result) {
         console.log("config: " + result);
-    }
+    },
+      function () {
+            console.log("failed");
+        }
 );
 ```
 ### Request Config
 Request the configuration.
 
 ```js
-window.plugins.appconnect.requestConfig();
+window.plugins.appconnect.requestConfig(   function () {
+                                                console.log("success);
+                                            },
+                                              function () {
+                                                    console.log("failed");
+                                                });
 ```
 
 ## Supported Platforms
