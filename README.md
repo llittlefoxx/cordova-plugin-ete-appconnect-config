@@ -23,27 +23,28 @@ phonegap local plugin add <plugin-directory>
 ### Set Config Handler
 The method passed to `setConfigHandler` will be triggered when new or updated configurations are available.
 
-```js
-window.plugins.appconnect.setConfigHandler (
-    function (result) {
-        console.log("config: " + result);
-    },
-      function () {
-            console.log("failed");
-        }
-);
-```
-### Request Config
-Request the configuration.
 
-```js
-window.plugins.appconnect.requestConfig(   function () {
-                                                console.log("success);
-                                            },
-                                              function () {
-                                                    console.log("failed");
-                                                });
-```
+    window.plugins.appconnect.requestConfig(
+        function (result) {
+            console.log(result);
+            console.log("window.plugins.appconnect.requestConfig");
+        },
+        function () {
+            console.log("failed set conf")
+        });
+
+    // Here is your next action
+    window.plugins.appconnect.setConfigHandler(
+        function (result) {
+            console.log(result);
+
+            console.log("window.plugins.appconnect.setConfigHandler");
+        },
+        function () {
+            console.log("failed set conf")
+        }
+    );
+
 
 ## Supported Platforms
 

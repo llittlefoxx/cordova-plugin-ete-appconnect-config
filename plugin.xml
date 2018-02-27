@@ -4,7 +4,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="cordova-plugin-ete-appconnect-config"
-        version="8.1.2">
+        version="8.1.3">
 
     <name>cordova-plugin-appconnect-config</name>
     <author>MobileIron</author>
